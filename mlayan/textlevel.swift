@@ -9,23 +9,16 @@ import SwiftUI
 struct ScenarioDetailView: View {
     let scenario: Scenario
     @State private var selectedChoiceIndex: Int? = nil
-    
+    @Environment(\.dismiss) var dismiss // ✅ عشان نرجع تلقائيًا
+
     var body: some View {
         VStack(spacing: 20) {
-            // Header
-            HStack {
-                Image(systemName: "chevron.backward")
-                    .foregroundColor(.white)
-                    .padding(.leading)
-                Spacer()
-            }
-            
             Text("المستوى \(scenario.level)")
                 .font(.largeTitle)
                 .fontWeight(.bold)
                 .foregroundColor(.white)
-                .padding(.top, -30)
-            
+                .padding(.top)
+
             // ✅ Scenario Box with custom background image
             ZStack {
                 Image("scenario_box")
@@ -37,15 +30,15 @@ struct ScenarioDetailView: View {
             }
             .frame(maxWidth: .infinity)
             .padding(.horizontal)
-            
-            // Image (ثابتة - ما تتغير)
+
+            // صورة ثابتة
             Image("meeting_illustration")
                 .resizable()
                 .scaledToFit()
                 .frame(height: 200)
                 .padding(.horizontal)
-            
-            // Options - شكل ثابت زي الصورة
+
+            // الخيارات
             VStack(spacing: 15) {
                 ForEach(Array(scenario.choices.enumerated()), id: \.offset) { index, choice in
                     FixedOptionButton(
@@ -53,17 +46,28 @@ struct ScenarioDetailView: View {
                         label: optionLetter(for: index)
                     ) {
                         selectedChoiceIndex = index
-                        // ما نسوي أي شي ثاني (لأنك ما تبي تطلع النقاط)
                     }
                 }
             }
             .padding(.horizontal)
-            
+
             Spacer()
         }
         .background(Color("Background").edgesIgnoringSafeArea(.all))
+        .navigationBarBackButtonHidden(true) // ✅ نخفي زر الباك العادي
+        .toolbar {
+            // ✅ نضيف زر باك على اليمين
+            ToolbarItem(placement: .navigationBarTrailing) {
+                Button(action: {
+                    dismiss() // ✅ يرجع للماب
+                }) {
+                    Image(systemName: "chevron.backward")
+                        .foregroundColor(.white)
+                }
+            }
+        }
     }
-    
+
     func optionLetter(for index: Int) -> String {
         switch index {
         case 0: return "أ"
@@ -74,7 +78,7 @@ struct ScenarioDetailView: View {
     }
 }
 
-// ✅ Custom button with fixed design (زي اللي بالصورة)
+// ✅ Custom button with fixed design
 struct FixedOptionButton: View {
     let text: String
     let label: String
@@ -83,39 +87,35 @@ struct FixedOptionButton: View {
     var body: some View {
         Button(action: action) {
             ZStack {
-                // ✅ خلفية الصورة (Option)
                 Image("Option")
                     .resizable()
                     .scaledToFill()
-                    .frame(height: 110) // تقدر تتحكم في الارتفاع لو حبيت
-                
+                    .frame(height: 110)
+
                 HStack {
                     Spacer()
-                    
+
                     Text(text)
                         .font(.system(size: 14))
                         .foregroundColor(.black)
                         .multilineTextAlignment(.leading)
-                        .lineSpacing(4) // ✅ مسافة بين السطور
-                        .padding(.horizontal, 12) // ✅ يوازن المسافة يمين ويسار
-                        .padding(.vertical, 8)    // ✅ يضيف تهوية فوق وتحت
-                        .fixedSize(horizontal: false, vertical: true) // ✅ يخليه يلف طبيعي
+                        .lineSpacing(4)
+                        .padding(.horizontal, 12)
+                        .padding(.vertical, 8)
+                        .fixedSize(horizontal: false, vertical: true)
                         .padding(.trailing, 75)
                 }
-                    Text(label)
-                        .font(.system(size: 18, weight: .bold)) // شوي أكبر عشان الصورة كبرت
-                        .frame(width: 36, height: 36) // أكبر شوي مع كبر الصورة
-                        .foregroundColor(.black)
-                        .padding(.leading, 300)
-
-
-                }
+                Text(label)
+                    .font(.system(size: 18, weight: .bold))
+                    .frame(width: 36, height: 36)
+                    .foregroundColor(.black)
+                    .padding(.leading, 300)
             }
-            .frame(height: 60) // نفس ارتفاع الصورة عشان يثبت الشكل
-            .clipShape(RoundedRectangle(cornerRadius: 12))
         }
+        .frame(height: 60)
+        .clipShape(RoundedRectangle(cornerRadius: 12))
     }
-
+}
 
 #Preview {
     ScenarioDetailView(scenario: scenarios[0])
